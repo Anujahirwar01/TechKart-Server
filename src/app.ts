@@ -41,6 +41,10 @@ app.use("/api/v1/dashboard", dashboardRoute);
 app.use("/uploads", express.static("uploads"));
 app.use(errorMiddleware);
 
+app.get("/", (req, res) => {
+    res.send("TechKart API is running");
+});
+
 app.listen(Port, () => {
     console.log('express is running on port ' + Port);
 });
