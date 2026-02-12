@@ -12,13 +12,17 @@ export const newUser = TryCatch(async (
 ) => {
     const { name, email, photo, gender, role, _id, dob } = req.body;
 
-    if (!_id || !name || !email || !photo || !gender || !role || !dob) {
+    console.log("Creating new user with data:", { name, email, photo, gender, role, _id, dob });
+
+    if (!_id || !name || !email || !photo || !gender || !dob) {
+        console.log("Missing required fields");
         next(new ErrorHandler("All fields are required", 400));
         return;
     }
 
     let existingUser = await User.findOne({ _id });
     if (existingUser) {
+        console.log("User already exists:", existingUser.name);
         return res.status(200).json({
             success: true,
             message: `welcome back, ${existingUser.name}`
@@ -30,10 +34,13 @@ export const newUser = TryCatch(async (
         email,
         photo,
         gender,
-        role,
+        role: role || "user",
         _id,
-        dob
+        dob: new Date(dob)
     });
+    
+    console.log("New user created successfully:", newUserDoc.name);
+    
     return res.status(201).json({
         success: true,
         message: `welcome, ${newUserDoc.name}`
