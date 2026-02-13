@@ -33,7 +33,7 @@ export type SearchRequestQuery = {
     page?: string;
 }
 
-export interface BaseQuery{
+export interface BaseQuery {
     name?: { $regex: string, $options: string };
     category?: string;
     price?: { $gte?: number, $lte?: number };
@@ -43,7 +43,7 @@ export type InvalidateCacheProps = {
     product?: boolean;
     order?: boolean;
     admin?: boolean;
-    userId?: string;  
+    userId?: string;
     orderId?: string;
     productId?: string | string[];
 }
@@ -72,6 +72,6 @@ export interface NewOrderRequestBody {
     shippingCharges: number;
     discount: number;
     total: number;
-    orderItems:OrderItemType[];
-    
+    orderItems: OrderItemType[];
+
 }   
