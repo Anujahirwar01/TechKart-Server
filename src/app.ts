@@ -25,9 +25,11 @@ app.use(morgan('dev'));
 // CORS configuration to allow multiple origins
 const allowedOrigins = [
     process.env.FRONTEND_URL,
+    process.env.VERCEL_URL,
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:3000',
+    'https://tach-kart-frontend.vercel.app',
 ].filter(Boolean);
 
 app.use(cors({
@@ -35,14 +37,16 @@ app.use(cors({
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
         
-        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+        if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
+            console.log('CORS blocked origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 
