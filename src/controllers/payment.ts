@@ -47,14 +47,21 @@ export const applyDiscount = TryCatch(
     async (req: Request, res: Response, next: NextFunction) => {
         const { code } = req.query;
 
+        console.log('Discount request received for code:', code);
+
         if (!code || typeof code !== 'string') {
+            console.log('Invalid code format:', code);
             return next(new ErrorHandler("Please provide a valid coupon code", 400));
         }
 
         const discount = await Coupon.findOne({ code });
+        console.log('Coupon found:', discount);
+        
         if (!discount) {
+            console.log('Coupon not found in database:', code);
             return next(new ErrorHandler("Invalid coupon code", 400));
         }
+        
         return res.status(200).json({
             success: true,
             discount: discount.amount
