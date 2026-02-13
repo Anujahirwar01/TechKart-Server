@@ -230,6 +230,8 @@ export const newProduct = TryCatch(async (
     const { name, category, price, stock } = req.body;
     const photo = req.file;
 
+    console.log('New product request:', { name, category, price, stock, photo: photo?.filename });
+
     if (!photo) {
         next(new ErrorHandler("Product photo is required", 400));
         return;
@@ -243,19 +245,30 @@ export const newProduct = TryCatch(async (
         return;
     }
 
-    const product = await Product.create({
-        name,
-        category: category.toLowerCase(),
-        price,
-        stock,
-        photo: photo.path
-    });
+    try {
+        const product = await Product.create({
+            name,
+            category: category.toLowerCase(),
+            price,
+            stock,
+            photo: photo.path
+        });
 
-    await invalidateCache({ product: true, admin: true });
+        console.log('Product created successfully:', product._id);
 
-    return res.status(201).json({
-        success: true,
-        message: "Product created successfully",
-        product
-    });
+        await invalidateCache({ product: true, admin: true });
+
+        return res.status(201).json({
+            success: true,
+            message: "Product created successfully",
+            product
+        });
+    } catch (error: any) {
+        // Clean up uploaded file if product creation fails
+        rm(photo.path, () => {
+            console.log('Temporary file deleted due to product creation failure');
+        });
+        console.error('Product creation error:', error);
+        next(new ErrorHandler(`Product creation failed: ${error.message}`, 500));
+    }
 })
