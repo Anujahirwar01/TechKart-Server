@@ -83,32 +83,41 @@ export const newOrder = TryCatch(async (req: Request<{}, {}, NewOrderRequestBody
         discount, total
     } = req.body
 
+    console.log('New order request:', { shippingInfo, orderItems, user, subtotal, tax, shippingCharges, discount, total });
+
     if (!shippingInfo || !orderItems || !Array.isArray(orderItems) || orderItems.length === 0 || !user ||
         subtotal == null || tax == null || shippingCharges == null ||
         discount == null || total == null) {
+        console.log('Missing required fields');
         return next(new ErrorHandler("Please provide all the required fields", 400));
     }
 
+    try {
+        const order = await Order.create({
+            shippingInfo, orderItems, user,
+            subtotal, tax, shippingCharges,
+            discount, total
+        });
 
-    const order = await Order.create({
-        shippingInfo, orderItems, user,
-        subtotal, tax, shippingCharges,
-        discount, total
-    });
+        console.log('Order created successfully:', order._id);
 
-    await reduceStock(orderItems);
+        await reduceStock(orderItems);
 
-    await invalidateCache({
-        order: true, product: true, admin: true,
-        userId: user,
-        productId: order.orderItems.map(item => String(item.productId)),
-        orderId: order._id.toString()
-    });
+        await invalidateCache({
+            order: true, product: true, admin: true,
+            userId: user,
+            productId: order.orderItems.map(item => String(item.productId)),
+            orderId: order._id.toString()
+        });
 
-    return res.status(201).json({
-        success: true,
-        message: "Order created successfully"
-    });
+        return res.status(201).json({
+            success: true,
+            message: "Order created successfully"
+        });
+    } catch (error: any) {
+        console.error('Order creation error:', error);
+        return next(new ErrorHandler(`Order creation failed: ${error.message}`, 500));
+    }
 });
 
 
