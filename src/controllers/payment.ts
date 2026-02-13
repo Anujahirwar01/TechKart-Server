@@ -56,12 +56,12 @@ export const applyDiscount = TryCatch(
 
         const discount = await Coupon.findOne({ code });
         console.log('Coupon found:', discount);
-        
+
         if (!discount) {
             console.log('Coupon not found in database:', code);
             return next(new ErrorHandler("Invalid coupon code", 400));
         }
-        
+
         return res.status(200).json({
             success: true,
             discount: discount.amount
