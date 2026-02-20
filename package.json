@@ -7,7 +7,8 @@
     "start": "node dist/app.js",
     "build": "tsc",
     "watch": "tsc -w",
-    "dev": "nodemon dist/app.js"
+    "dev": "npx tsx watch ./src/app.ts",
+    "seed": "npx tsx ./src/seeder.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,13 +17,14 @@
   "dependencies": {
     "@types/morgan": "^1.9.10",
     "@types/validator": "^13.15.10",
+    "cloudinary": "^2.9.0",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "ioredis": "^5.9.3",
     "mongoose": "^9.1.5",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
-    "node-cache": "^5.1.2",
     "stripe": "^20.3.0",
     "uuid": "^13.0.0",
     "validator": "^13.15.26"

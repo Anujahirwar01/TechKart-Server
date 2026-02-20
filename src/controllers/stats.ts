@@ -1,7 +1,7 @@
 
 import type { Request, Response, NextFunction } from 'express';
 import { TryCatch } from '../middlewares/error.js';
-import { myCache } from '../app.js';
+import { redis, redisTTL } from "../app.js";
 import { Product } from '../models/product.js';
 import { User } from '../models/user.js';
 import { Order } from '../models/order.js';
@@ -10,10 +10,11 @@ import { calculatePercentage, getChartData } from '../utils/features.js';
 
 export const getDashboardStats = TryCatch(async (req: Request
     , res: Response, next: NextFunction) => {
-    let stats = {};
+    let stats;
     const key = `admin-stats`;
-    if (myCache.has(key)) {
-        stats = JSON.parse(myCache.get(key) as string);
+    stats = await redis.get(key);
+    if (stats) {
+        stats = JSON.parse(stats);
     } else {
         const today = new Date();
         const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 5, 1);
@@ -176,7 +177,7 @@ export const getDashboardStats = TryCatch(async (req: Request
             latestTransaction: modifiedLatestTransactions,
         }
 
-        myCache.set(key, JSON.stringify(stats));
+        await redis.setex(key, redisTTL, JSON.stringify(stats));
     }
 
     return res.status(200).json({
@@ -189,11 +190,13 @@ export const getPieStats = TryCatch(async (req: Request
     , res: Response, next: NextFunction) => {
 
     let charts;
+const key = `admin-pie-charts`;
+    charts = await redis.get(key);
 
-    const key = `admin-pie-charts`;
+    
 
-    if (myCache.has(key)) {
-        charts = JSON.parse(myCache.get(key) as string);
+    if (charts) {
+         charts = JSON.parse(charts);
     } else {
 
         const allOrderPromise = Order.find({}).select(["total", "discount", "subtotal",
@@ -273,7 +276,7 @@ export const getPieStats = TryCatch(async (req: Request
             adminCustomer,
             usersAgeGroup
         }
-        myCache.set(key, JSON.stringify(charts));
+        await redis.setex(key, redisTTL, JSON.stringify(charts));
     }
     return res.status(200).json({
         success: true,
@@ -286,9 +289,10 @@ export const getBarStats = TryCatch(async (_req: Request
 
     let charts;
     const key = `admin-bar-charts`;
+    charts = await redis.get(key);
 
-    if (myCache.has(key)) {
-        charts = JSON.parse(myCache.get(key) as string);
+    if (charts) {
+        charts = JSON.parse(charts);
     } else {
 
         const today = new Date();
@@ -346,7 +350,7 @@ export const getBarStats = TryCatch(async (_req: Request
             users: userCounts,
             orders: orderCounts
         }
-        myCache.set(key, JSON.stringify(charts));
+        await redis.setex(key, redisTTL, JSON.stringify(charts));
     }
 
     return res.status(200).json({
@@ -360,8 +364,10 @@ export const getLineStats = TryCatch(async (req: Request
     let charts;
     const key = `admin-line-charts`;
 
-    if (myCache.has(key)) {
-        charts = JSON.parse(myCache.get(key) as string);
+    charts = await redis.get(key);
+
+    if (charts) {
+        charts = JSON.parse(charts);
     } else {
 
         const today = new Date();
@@ -416,7 +422,7 @@ export const getLineStats = TryCatch(async (req: Request
             discount,
             revenue
         }
-        myCache.set(key, JSON.stringify(charts));
+        await redis.setex(key, redisTTL, JSON.stringify(charts));
     }
 
     return res.status(200).json({

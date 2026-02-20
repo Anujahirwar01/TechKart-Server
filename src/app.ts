@@ -8,10 +8,11 @@ import productRoute from './routes/products.js';
 import orderRoute from './routes/orders.js';
 import paymentRoute from './routes/payment.js';
 import dashboardRoute from './routes/stats.js';
-import NodeCache from 'node-cache';
 import morgan from 'morgan';
 import Stripe from 'stripe';
 import cors from 'cors';
+import { v2 as cloudinary } from 'cloudinary';
+import { connectRedis } from './utils/features.js';
 
 
 const Port = process.env.PORT || 4000;
@@ -27,6 +28,7 @@ const allowedOrigins = [
     process.env.FRONTEND_URL,
     process.env.VERCEL_URL,
     'http://localhost:5173',
+    process.env.VERCEL_URL,
     'http://localhost:5174',
     'http://localhost:3000',
     'https://tach-kart-frontend.vercel.app',
@@ -49,9 +51,11 @@ app.use(cors({
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
-
-connectDB();
-export const myCache = new NodeCache();
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || '',
+    api_key: process.env.CLOUDINARY_API_KEY || '',
+    api_secret: process.env.CLOUDINARY_API_SECRET || '',
+});
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/product", productRoute);
 app.use("/api/v1/order", orderRoute);
@@ -65,8 +69,21 @@ app.get("/", (req, res) => {
     res.send("TechKart API is running");
 });
 
-app.listen(Port, () => {
-    console.log('express is running on port ' + Port);
-});
+export const redis = await connectRedis(process.env.REDIS_URI || '');
+export const redisTTL = process.env.REDIS_TTL || 60 * 60 * 4;
+
+const startServer = async () => {
+    try {
+        await connectDB();
+        app.listen(Port, () => {
+            console.log('express is running on port ' + Port);
+        });
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+};
+
+startServer();
 
 export default app;

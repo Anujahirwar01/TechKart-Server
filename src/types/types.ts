@@ -17,6 +17,7 @@ export interface NewProductRequestBody {
     price: number;
     stock: number;
     photo: string;
+    description: string;
 }
 
 export type ControllerType = (
@@ -46,6 +47,8 @@ export type InvalidateCacheProps = {
     userId?: string;
     orderId?: string;
     productId?: string | string[];
+    review?: boolean;
+    reviewId?: string;
 }
 
 export type OrderItemType = {

@@ -1,5 +1,5 @@
 import express from 'express';
-import { allCoupons, applyDiscount, newCoupon , deleteCoupon , createPaymentIntent } from '../controllers/payment.js';
+import { allCoupons, applyDiscount, newCoupon , deleteCoupon , createPaymentIntent, getSingleCoupon, updateCoupon } from '../controllers/payment.js';
 import { adminOnly } from '../middlewares/auth.js';
 
 
@@ -12,6 +12,10 @@ router.post('/coupon/new', adminOnly, newCoupon);
 router.get('/discount', applyDiscount);
 
 router.get("/coupon/all" ,adminOnly, allCoupons);
+
+router.get("/coupon/:id", adminOnly, getSingleCoupon);
+
+router.put("/coupon/:id", adminOnly, updateCoupon);
 
 router.delete("/coupon/:id" ,adminOnly, deleteCoupon);
 

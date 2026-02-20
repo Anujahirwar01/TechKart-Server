@@ -79,6 +79,27 @@ export const getUser = TryCatch(async (
 }
 );
 
+export const getDemoAdmin = TryCatch(async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const DEMO_ID = "techkart-demo-admin";
+    let user = await User.findById(DEMO_ID);
+    if (!user) {
+        user = await User.create({
+            _id: DEMO_ID,
+            name: "Demo Admin",
+            email: "demo@techkart.com",
+            photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=TechKartDemo",
+            role: "admin",
+            gender: "male",
+            dob: new Date("1995-01-01"),
+        });
+    }
+    return res.status(200).json({ success: true, user });
+});
+
 export const deleteUser = TryCatch(async (
     req: Request,
     res: Response,
