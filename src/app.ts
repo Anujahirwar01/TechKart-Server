@@ -28,7 +28,7 @@ const allowedOrigins = [
     process.env.FRONTEND_URL,
     process.env.VERCEL_URL,
     'http://localhost:5173',
-    process.env.VERCEL_URL,
+    'http://localhost:4173',
     'http://localhost:5174',
     'http://localhost:3000',
     'https://tach-kart-frontend.vercel.app',
